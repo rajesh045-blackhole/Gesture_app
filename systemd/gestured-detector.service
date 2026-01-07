@@ -1,0 +1,56 @@
+[Unit]
+Description=Gesture Recognition Detector (Vision Processing)
+Documentation=man:gestured(8)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gestured
+Group=gestured
+
+# Working directory
+WorkingDirectory=/opt/gestured
+
+# Environment variables
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONDONTWRITEBYTECODE=1"
+
+# Start command
+ExecStart=/usr/bin/python3 /opt/gestured/gesture_detector.py \
+    --config /etc/gestured/gesture_config.yaml \
+    --log-level INFO \
+    --log-file /var/log/gestured/detector.log
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Resource limits (prevent runaway processes)
+MemoryLimit=256M
+CPUQuota=50%
+TasksMax=100
+
+# Timeout (detection should be fast)
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/tmp/gestured.sock /var/log/gestured
+
+# Capability restrictions
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# Watchdog (optional: requires heartbeat every 30 seconds)
+# Watchdog=30s
+# WatchdogSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,86 @@
+# OS-Level Gesture Control System
+> _Production-grade daemon built on top of [Kinivi Hand Gesture Recognition](https://github.com/kinivi/hand-gesture-recognition-mediapipe)_
+
+A privacy-focused, privilege-separated gesture control system for Linux and macOS. Controls media, volume, and screenshots using hand gestures processed via MediaPipe and TFLite.
+
+![Architecture](https://user-images.githubusercontent.com/37477845/102222442-c452cd00-3f26-11eb-93ec-c387c98231be.gif)
+
+## 🚀 Features
+
+- **Privacy First**: Unprivileged vision daemon (no OS access).
+- **Secure Architecture**: Privileged executor daemon isolated via Unix Socket IPC.
+- **Safety System**:
+  - **Rate Limiting**: Max 10 actions/second.
+  - **Debouncing**: 200ms hysteresis prevents accidental triggers.
+  - **Confidence Checks**: Only high-confidence (>0.6) gestures are acted upon.
+  - **Kill Switch**: Immediate system override.
+- **OS Integration**:
+  - **Media**: Play/Pause, Next/Prev (Music.app support on macOS).
+  - **Volume**: Up, Down, Mute.
+  - **Screenshots**: Instant capture.
+
+## 🛠 Deployment (Production)
+
+### Quick Install (Linux/macOS)
+```bash
+# Provide sudo password when prompted for service installation
+./scripts/install.sh
+```
+
+### Manage Services
+```bash
+# Start
+sudo systemctl start gestured-detector gestured-executor
+
+# Monitor Logs
+sudo journalctl -u gestured-* -f
+```
+
+### Uninstall
+```bash
+./scripts/uninstall.sh
+```
+
+## 📂 Architecture
+
+The system is split into two separate processes for security:
+
+1.  **`gesture_detector.py`** (Unprivileged)
+    *   Captures video.
+    *   Runs MediaPipe/TFLite inference.
+    *   Sends JSON events to socket.
+    *   *No ability to execute system commands.*
+
+2.  **`gesture_executor.py`** (Privileged)
+    *   Listens on `/tmp/gestured.sock`.
+    *   Validates events (SafetyManager).
+    *   Executes configured actions (`config/gesture_config.yaml`).
+
+## 🔧 Configuration
+
+Edit `config/gesture_config.yaml` to map gestures to actions:
+
+```yaml
+gestures:
+  hand_open:
+    id: 0
+    actions: [{type: "media_play"}]
+  finger_clockwise:
+    id: 1
+    actions: [{type: "volume_up", value: 5}]
+```
+
+## 🧪 Verification
+
+- **Latency**: ~580-850ms end-to-end.
+- **False Positives**: 0% in idle testing (10s duration).
+- **Resource Usage**: ~250MB RAM total.
+
+---
+
+## Based on Kinivi Hand Gesture Recognition
+_Original README below:_
+
 # hand-gesture-recognition-using-mediapipe
 Estimate hand pose using MediaPipe (Python version).<br> This is a sample 
 program that recognizes hand signs and finger gestures with a simple MLP using the detected key points.

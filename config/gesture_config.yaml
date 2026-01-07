@@ -1,0 +1,69 @@
+# Gesture Configuration File
+# Maps recognized gestures to system actions
+
+gestures:
+  # Hand Sign Gestures (static, instant)
+  hand_open:
+    id: 0
+    enabled: true
+    actions:
+      - type: "media_play"
+        
+  hand_closed:
+    id: 1
+    enabled: true
+    actions:
+      - type: "media_pause"
+  
+  hand_point:
+    id: 2
+    enabled: true
+    actions: []  # No action (used for finger gesture tracking)
+
+  # Finger Gesture (temporal, history-based)
+  finger_stationary:
+    id: 0
+    enabled: true
+    rate_limit_ms: 500
+    actions:
+      - type: "noop"
+  
+  finger_clockwise:
+    id: 1
+    enabled: true
+    rate_limit_ms: 1000
+    actions:
+      - type: "volume_up"
+        value: 5
+  
+  finger_counter_clockwise:
+    id: 2
+    enabled: true
+    rate_limit_ms: 1000
+    actions:
+      - type: "volume_down"
+        value: 5
+  
+  finger_v_open:
+    id: 3
+    enabled: true
+    rate_limit_ms: 500
+    actions:
+      - type: "screenshot"
+
+# Global safety settings
+safety:
+  enable_kill_switch: true      # ESC key disables gestures
+  max_actions_per_second: 10    # Rate limiting
+  allow_list:
+    - "media_play"
+    - "media_pause"
+    - "volume_up"
+    - "volume_down"
+    - "screenshot"
+  
+  # Contexts where gestures are disabled
+  disabled_contexts:
+    - "fullscreen_app"          # Video/game in fullscreen
+    - "locked_screen"           # Screen locked
+    - "password_entry"          # Typing passwords

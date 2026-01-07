@@ -1,0 +1,49 @@
+[Unit]
+Description=Gesture Recognition Executor (Privileged Action Handler)
+Documentation=man:gestured(8)
+After=gestured-detector.service
+Requires=gestured-detector.service
+
+[Service]
+Type=simple
+User=root
+
+# Working directory
+WorkingDirectory=/opt/gestured
+
+# Environment variables
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONDONTWRITEBYTECODE=1"
+
+# Start command
+ExecStart=/usr/bin/python3 /opt/gestured/gesture_executor.py \
+    --config /etc/gestured/gesture_config.yaml \
+    --log-level INFO \
+    --log-file /var/log/gestured/executor.log
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Resource limits
+MemoryLimit=128M
+CPUQuota=25%
+TasksMax=50
+
+# Timeout
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Security hardening (less strict because needs privileges)
+NoNewPrivileges=true
+PrivateTmp=yes
+ReadWritePaths=/tmp/gestured.sock /var/log/gestured /var/run/gestured
+
+# Capability restrictions (only needed capabilities)
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target
